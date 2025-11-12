@@ -1,5 +1,4 @@
 <app-header></app-header>
-
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-primary fw-bold">
@@ -18,20 +17,27 @@
             <tr>
               <th style="width: 5%">#</th>
               <th>CMP</th>
-              <th>Nombres</th>
+              <th>Nombre</th>
               <th>Apellidos</th>
               <th>Especialidad</th>
+              <th>Estado</th>
               <th class="text-end">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let m of medicos; let i = index">
               <td>{{ i + 1 }}</td>
-              <td class="text-monospace">{{ m.cmp }}</td>
-              <td>{{ m.nombres }}</td>
-              <td>{{ m.apellidos }}</td>
+              <td class="text-monospace">{{ m.medCmp }}</td>
+              <td>{{ m.medNombre }}</td>
+              <td>{{ m.medApellidos }}</td>
+              <td>{{ m.especialidad?.nombre }}</td>
               <td>
-                {{ m.especialidad?.nombre || 'Sin especialidad' }}
+                <span 
+                  class="badge"
+                  [class.bg-success]="m.estado === 'ACTIVO'"
+                  [class.bg-secondary]="m.estado === 'INACTIVO'">
+                  {{ m.estado === 'ACTIVO' ? 'Activo' : 'Inactivo' }}
+                </span>
               </td>
               <td class="text-end">
                 <button class="btn btn-sm btn-outline-warning me-1" (click)="abrirEditar(m)">
@@ -43,7 +49,7 @@
               </td>
             </tr>
             <tr *ngIf="medicos.length === 0">
-              <td colspan="6" class="text-center py-3 text-muted">No hay médicos registrados</td>
+              <td colspan="7" class="text-center py-3 text-muted">No hay médicos registrados</td>
             </tr>
           </tbody>
         </table>
@@ -62,40 +68,50 @@
       </div>
       <div class="modal-body">
         <form [formGroup]="form" (ngSubmit)="guardar()">
-          <div class="mb-3">
-            <label class="form-label">CMP *</label>
-            <input class="form-control" formControlName="cmp" />
-            <div class="text-danger" *ngIf="form.controls.cmp.touched && form.controls.cmp.invalid">
-              Mínimo 3 caracteres
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">CMP *</label>
+              <input type="text" class="form-control" formControlName="medCmp" />
+              <div class="text-danger" *ngIf="form.controls.medCmp.touched && form.controls.medCmp.invalid">
+                El CMP es obligatorio
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Estado *</label>
+              <select class="form-select" formControlName="estado">
+                <option value="ACTIVO">Activo</option>
+                <option value="INACTIVO">Inactivo</option>
+              </select>
             </div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Nombres *</label>
-            <input class="form-control" formControlName="nombres" />
-            <div class="text-danger" *ngIf="form.controls.nombres.touched && form.controls.nombres.invalid">
-              Mínimo 3 caracteres
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombre *</label>
+              <input class="form-control" formControlName="medNombre" />
+              <div class="text-danger" *ngIf="form.controls.medNombre.touched && form.controls.medNombre.invalid">
+                Mínimo 3 caracteres
+              </div>
             </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Apellidos *</label>
-            <input class="form-control" formControlName="apellidos" />
-            <div class="text-danger" *ngIf="form.controls.apellidos.touched && form.controls.apellidos.invalid">
-              Mínimo 3 caracteres
+            <div class="col-md-6">
+              <label class="form-label">Apellidos *</label>
+              <input class="form-control" formControlName="medApellidos" />
+              <div class="text-danger" *ngIf="form.controls.medApellidos.touched && form.controls.medApellidos.invalid">
+                Mínimo 3 caracteres
+              </div>
             </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Especialidad *</label>
             <select class="form-select" formControlName="idEspecialidad">
-              <option value="" disabled selected>Seleccione una especialidad</option>
-              <option *ngFor="let e of especialidades" [value]="e.idEspecialidad">
+              <option [ngValue]="null">Seleccione una especialidad</option>
+              <option *ngFor="let e of especialidades" [ngValue]="e.id">
                 {{ e.nombre }}
               </option>
             </select>
             <div class="text-danger" *ngIf="form.controls.idEspecialidad.touched && form.controls.idEspecialidad.invalid">
-              Debe seleccionar una especialidad
+              La especialidad es obligatoria
             </div>
           </div>
 

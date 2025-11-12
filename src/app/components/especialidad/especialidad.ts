@@ -1,7 +1,8 @@
+// src/app/components/especialidad/especialidad.ts
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { Header } from '../header/header';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Especialidad } from '../../models/especialidad';
 import { EspecialidadService } from '../../services/especialidad';
 
@@ -18,27 +19,30 @@ export class EspecialidadComponent implements OnInit {
 
   especialidades: Especialidad[] = [];
   tituloModal = 'Nueva Especialidad';
+  editId: number | null = null;
+
   form = this.fb.group({
     nombre: ['', [Validators.required, Validators.minLength(3)]],
+    estado: ['ACTIVO', [Validators.required]],
   });
 
   @ViewChild('modal') modalRef!: ElementRef<HTMLDivElement>;
   private bsModal: any;
-  editId: number | null = null;
 
   ngOnInit(): void {
     this.listar();
   }
 
   listar() {
-    this.especialidadService.listar().subscribe((response) => (this.especialidades = response));
+    this.especialidadService.listar().subscribe(response => (this.especialidades = response));
   }
 
-  abrirEditar(especialidad: Especialidad) {
+  abrirEditar(esp: Especialidad) {
     this.tituloModal = 'Editar Especialidad';
-    this.editId = especialidad.idEspecialidad!;
+    this.editId = esp.id!;
     this.form.patchValue({
-      nombre: especialidad.nombre,
+      nombre: esp.nombre ?? '',
+      estado: esp.estado ?? 'ACTIVO',
     });
     this.showModal();
   }
@@ -52,9 +56,11 @@ export class EspecialidadComponent implements OnInit {
   guardar() {
     if (this.form.invalid) return;
 
+    const v = this.form.value;
     const dto: Especialidad = {
-      idEspecialidad: this.editId || undefined,
-      nombre: this.form.value.nombre!,
+      id: this.editId ?? undefined,
+      nombre: v.nombre!,
+      estado: v.estado!,
     };
 
     const obs = this.editId
@@ -68,7 +74,7 @@ export class EspecialidadComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al guardar especialidad:', err);
-        alert('Error al guardar la especialidad. Revise los datos.');
+        alert('Error al guardar la especialidad. Revise los datos únicos (Nombre).');
       },
     });
   }
@@ -76,7 +82,10 @@ export class EspecialidadComponent implements OnInit {
   abrirNuevo() {
     this.tituloModal = 'Nueva Especialidad';
     this.editId = null;
-    this.form.reset({ nombre: '' });
+    this.form.reset({
+      nombre: '',
+      estado: 'ACTIVO',
+    });
     this.showModal();
   }
 

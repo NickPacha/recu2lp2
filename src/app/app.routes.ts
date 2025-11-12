@@ -4,8 +4,8 @@ import { EspecialidadComponent } from './components/especialidad/especialidad';
 import { Home } from './components/home/home';
 
 export const routes: Routes = [
-    {path:'',component:Home},
-    {path:'medico',component:MedicoComponent},
-    {path:'especialidad',component:EspecialidadComponent},
-    {path:'**',redirectTo:''}
+    { path: '', component: Home },
+    { path: 'medicos', component: MedicoComponent },
+    { path: 'especialidades', component: EspecialidadComponent },
+    { path: '**', redirectTo: '' }
 ];

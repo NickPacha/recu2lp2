@@ -1,9 +1,8 @@
 <app-header></app-header>
-
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-primary fw-bold">
-      <i class="bi bi-hospital me-2"></i>Especialidades
+      <i class="bi bi-stethoscope me-2"></i>Especialidades
     </h2>
     <button class="btn btn-success" (click)="abrirNuevo()">
       <i class="bi bi-plus-circle me-1"></i> Nueva Especialidad
@@ -16,35 +15,35 @@
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th style="width: 10%">#</th>
+              <th style="width: 5%">#</th>
               <th>Nombre</th>
+              <th>Estado</th>
               <th class="text-end">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let e of especialidades; let i = index">
+            <tr *ngFor="let esp of especialidades; let i = index">
               <td>{{ i + 1 }}</td>
-              <td>{{ e.nombre }}</td>
+              <td>{{ esp.nombre }}</td>
+              <td>
+                <span 
+                  class="badge"
+                  [class.bg-success]="esp.estado === 'ACTIVO'"
+                  [class.bg-secondary]="esp.estado === 'INACTIVO'">
+                  {{ esp.estado === 'ACTIVO' ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
               <td class="text-end">
-                <button
-                  class="btn btn-sm btn-outline-warning me-1"
-                  (click)="abrirEditar(e)"
-                >
+                <button class="btn btn-sm btn-outline-warning me-1" (click)="abrirEditar(esp)">
                   <i class="bi bi-pencil"></i>
                 </button>
-                <button
-                  class="btn btn-sm btn-outline-danger"
-                  (click)="eliminar(e.idEspecialidad!)"
-                >
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminar(esp.id!)">
                   <i class="bi bi-trash"></i>
                 </button>
               </td>
             </tr>
-
             <tr *ngIf="especialidades.length === 0">
-              <td colspan="3" class="text-center py-3 text-muted">
-                No hay especialidades registradas
-              </td>
+              <td colspan="4" class="text-center py-3 text-muted">No hay especialidades registradas</td>
             </tr>
           </tbody>
         </table>
@@ -59,44 +58,29 @@
     <div class="modal-content">
       <div class="modal-header bg-light">
         <h5 class="modal-title text-primary">{{ tituloModal }}</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form [formGroup]="form" (ngSubmit)="guardar()">
           <div class="mb-3">
             <label class="form-label">Nombre *</label>
-            <input
-              class="form-control"
-              formControlName="nombre"
-              placeholder="Ingrese nombre de la especialidad"
-            />
-            <div
-              class="text-danger"
-              *ngIf="
-                form.controls.nombre.touched && form.controls.nombre.invalid
-              "
-            >
-              El nombre es obligatorio (mínimo 3 caracteres)
+            <input class="form-control" formControlName="nombre" />
+            <div class="text-danger" *ngIf="form.controls.nombre.touched && form.controls.nombre.invalid">
+              Mínimo 3 caracteres
             </div>
           </div>
 
+          <div class="mb-3">
+            <label class="form-label">Estado *</label>
+            <select class="form-select" formControlName="estado">
+              <option value="ACTIVO">Activo</option>
+              <option value="INACTIVO">Inactivo</option>
+            </select>
+          </div>
+
           <div class="modal-footer bg-light">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              [disabled]="form.invalid"
-            >
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
               <i class="bi bi-save me-1"></i> Guardar
             </button>
           </div>
