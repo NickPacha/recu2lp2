@@ -54,7 +54,7 @@ export class MedicoComponent implements OnInit {
             cmp: medico.cmp,
             nombres: medico.nombres,
             apellidos: medico.apellidos,
-            idEspecialidad: medico.idEspecialidad ?: null
+            idEspecialidad: medico.idEspecialidad ?? null
         });
         this.showModal();
     }
