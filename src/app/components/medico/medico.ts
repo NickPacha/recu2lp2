@@ -20,10 +20,16 @@ export class MedicoComponent implements OnInit {
   private medicoService = inject(MedicoService);
   private especialidadService = inject(EspecialidadService);
 
-  medicos: Medico[] = [];
+  medicos: Medico[] = []; // Lista completa de médicos
+  pagedMedicos: Medico[] = []; // Lista de médicos para la página actual
   especialidades: Especialidad[] = []; // Lista para el select
   tituloModal = 'Nuevo Médico';
   editId: number | null = null;
+
+  // Propiedades para la paginación
+  pageSize: number = 10; // Número de elementos por página (ajusta según necesidad)
+  currentPage: number = 1; // Página actual (inicia en 1)
+  totalPages: number = 0; // Total de páginas (se calculará dinámicamente)
 
   // ✅ Inicializa idEspecialidad como "null as number | null", similar a SancionComponent
   form = this.fb.group({
@@ -43,7 +49,10 @@ export class MedicoComponent implements OnInit {
   }
 
   listar() {
-    this.medicoService.listar().subscribe(response => (this.medicos = response));
+    this.medicoService.listar().subscribe(response => {
+      this.medicos = response;
+      this.calculatePagination(); // Calcula la paginación después de cargar los datos
+    });
   }
 
   listarEspecialidades() {
@@ -66,7 +75,15 @@ export class MedicoComponent implements OnInit {
 
   eliminar(id: number) {
     if (confirm('¿Eliminar médico?')) {
-      this.medicoService.eliminar(id).subscribe(() => this.listar());
+      this.medicoService.eliminar(id).subscribe(() => {
+        this.listar(); // Recarga la lista completa
+        // Opcional: Mantener la página actual si el médico eliminado no estaba en la última página
+        // Si se eliminó el último elemento de la última página, ir a la anterior
+        // if (this.medicos.length > 0 && this.currentPage > this.totalPages) {
+        //   this.currentPage = Math.max(1, this.currentPage - 1);
+        //   this.calculatePagination();
+        // }
+      });
     }
   }
 
@@ -96,7 +113,7 @@ export class MedicoComponent implements OnInit {
     obs.subscribe({
       next: () => {
         this.hideModal();
-        this.listar();
+        this.listar(); // Recarga la lista completa
       },
       error: (err) => {
         console.error('Error al guardar médico:', err);
@@ -129,5 +146,62 @@ export class MedicoComponent implements OnInit {
     if (this.bsModal) {
       this.bsModal.hide();
     }
+  }
+
+  /**
+   * Calcula el total de páginas y obtiene los médicos para la página actual.
+   */
+  private calculatePagination(): void {
+    if (this.medicos && this.medicos.length > 0) {
+      this.totalPages = Math.ceil(this.medicos.length / this.pageSize);
+      // Asegura que currentPage no exceda totalPages y sea al menos 1
+      this.currentPage = Math.min(Math.max(1, this.currentPage), this.totalPages);
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      this.pagedMedicos = this.medicos.slice(startIndex, endIndex);
+    } else {
+      this.totalPages = 0;
+      this.currentPage = 1;
+      this.pagedMedicos = [];
+    }
+  }
+
+  /**
+   * Cambia a una página específica.
+   * @param page Número de página objetivo (1-indexed).
+   */
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.calculatePagination(); // Actualiza los datos mostrados
+    }
+  }
+
+  /**
+   * Navega a la página anterior.
+   */
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.calculatePagination();
+    }
+  }
+
+  /**
+   * Navega a la página siguiente.
+   */
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.calculatePagination();
+    }
+  }
+
+  /**
+   * Genera un array con los números de página para el HTML.
+   * @returns Array de números de página.
+   */
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 }

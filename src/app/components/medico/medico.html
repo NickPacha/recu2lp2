@@ -25,8 +25,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let m of medicos; let i = index">
-              <td>{{ i + 1 }}</td>
+            <!-- Se itera sobre pagedMedicos en lugar de medicos -->
+            <tr *ngFor="let m of pagedMedicos; let i = index">
+              <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td> <!-- Número absoluto -->
               <td class="text-monospace">{{ m.medCmp }}</td>
               <td>{{ m.medNombre }}</td>
               <td>{{ m.medApellidos }}</td>
@@ -48,14 +49,33 @@
                 </button>
               </td>
             </tr>
-            <tr *ngIf="medicos.length === 0">
-              <td colspan="7" class="text-center py-3 text-muted">No hay médicos registrados</td>
+            <tr *ngIf="pagedMedicos.length === 0">
+              <td colspan="7" class="text-center py-3 text-muted">
+                <!-- Mensaje cuando no hay médicos en general o en la página actual -->
+                {{ medicos.length === 0 ? 'No hay médicos registrados' : 'No hay médicos en esta página' }}
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
+
+  <!-- Controles de Paginación -->
+  <nav aria-label="Navegación de paginación" class="mt-4" *ngIf="totalPages > 1">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <button class="page-link" (click)="previousPage()" [disabled]="currentPage === 1">Anterior</button>
+      </li>
+      <li class="page-item" [class.active]="page === currentPage" *ngFor="let page of pageNumbers">
+        <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <button class="page-link" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
+      </li>
+    </ul>
+  </nav>
+
 </div>
 
 <!-- Modal -->
